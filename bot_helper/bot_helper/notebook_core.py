@@ -286,10 +286,9 @@ def main_notebook():
         exit 
         """
     )
-
+    if isfile(path):
+        restore()
     while True:
-        if isfile(path):
-            restore()
         user_input = input(">>> ")
         input_parsed = user_input.split()
         command = input_parsed[0].lower()
