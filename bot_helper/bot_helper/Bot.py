@@ -1,6 +1,6 @@
-from bot_helper.address_book import *
+from bot_helper.adress_book import *
 from bot_helper.main import *
-from bot_helper.notebook_final import *
+from bot_helper.notebook_core import *
 
 
 def main():
