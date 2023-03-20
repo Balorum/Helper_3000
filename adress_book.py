@@ -2,32 +2,24 @@ import csv
 from collections import UserDict
 from datetime import datetime, timedelta
 from os.path import isfile
+
 path = "./book.csv"
 
-
-#def create_users(fake,users: list,n=10):
-#    for i in range(n):# кількість користувачів
-#        user = {} 
-#        user["name"] = fake.name()
-#        user["phone_number"]= fake.phone_number()
-#        user["birthday"] =fake.date()
-#        users.append(user)
-#        #print(user)
 
 class Field:  # батько для Name, Phone
     def __init__(self, value):
         self.value = value
         self.__value = None
 
-    def __repr__(self) -> str: 
-        return self.value  
+    def __repr__(self) -> str:
+        return self.value
 
 
-class Name(Field): 
+class Name(Field):
     pass
 
 
-class Phone(Field): 
+class Phone(Field):
     """Перевірка робиться в сеттері, тобто ми створимо захищене поле
     self.__value і якщо перевірка пройде ми наше значення що прийшло запишемо в
     захищенне поле"""
@@ -46,21 +38,19 @@ class Phone(Field):
         else:
             raise ValueError(f"Wrong number - number should have 10 symbols")
 
-   
+
 class Birthday(Field):
-    @property  
+    @property
     def value(self):
         return self.__value
 
     @value.setter
     def value(self, value):
         try:
-            bday = datetime.strptime(value, "%d.%m.%Y" )
+            bday = datetime.strptime(value, "%d.%m.%Y")
             self.__value = value
         except TypeError:
             return f"Format your birthday is not correct"
-
-
 
 
 class Record:
@@ -91,18 +81,26 @@ class Record:
         return f"Contact {self.name.value} don't have phone {old_phone.value}"
 
     def days_to_birthday(self):
-        birthday_date = datetime.strftime(self.birthday.value, "%d.%m.%Y")
+        new_date = datetime.strptime(self.birthday.value, "%d.%m.%Y")
+        birthday_date = datetime.strftime(new_date, "%d.%m.%Y")
         current_date = datetime.now()
-        birthday_date = birthday_date.replace(year=current_date.year)
-        delta_days = birthday_date - current_date
+        birthday_date = birthday_date.replace(
+            birthday_date[-4:], str(current_date.year)
+        )
+        new_birthday_date = datetime.strptime(birthday_date, "%d.%m.%Y")
+        delta_days = new_birthday_date - current_date
 
-        target_bday = datetime.strftime(birthday_date, "%d-%B-%Y")
+        target_bday = datetime.strftime(new_birthday_date, "%d-%B-%Y")
 
-        if delta_days > 0:
+        if delta_days.days > 0:
             return f"{delta_days.days} days left before {target_bday}"
         else:
-            birthday_date = birthday_date.replace(year=birthday_date.year + 1)
-            delta_days = birthday_date - current_date
+            birthday_date = birthday_date.replace(
+                birthday_date[-4:], str(current_date.year + 1)
+            )
+            new_birthday_date = datetime.strptime(birthday_date, "%d.%m.%Y")
+            delta_days = new_birthday_date - current_date
+            target_bday = datetime.strftime(new_birthday_date, "%d-%B-%Y")
             return f"{delta_days.days} days left before {target_bday}"
 
     def __repr__(self) -> str:
@@ -121,7 +119,7 @@ class AddressBook(UserDict):
             print_block += str(record) + "\n"
             if index < n:
                 index += 1
-            
+
             else:
                 yield print_block
                 index, print_block = 1, "-" * 50 + "\n"
@@ -142,7 +140,13 @@ class AddressBook(UserDict):
             writer.writeheader()
             for rec in self.data.values():
                 phone_row = ",".join([str(ph) for ph in rec.phones])
-                writer.writerow({"name":rec.name.value, "phones":phone_row, "birthday":rec.birthday})
+                writer.writerow(
+                    {
+                        "name": rec.name.value,
+                        "phones": phone_row,
+                        "birthday": rec.birthday,
+                    }
+                )
 
     def read_book(self):
         with open("book.csv", "r", newline="") as file:
@@ -173,11 +177,11 @@ class AddressBook(UserDict):
         if len(sub) < 3:
             print("Search works with 3 symbols min")
         else:
-             for rec in self.data.values():
+            for rec in self.data.values():
                 phone_row = ",".join([str(ph) for ph in rec.phones])
                 if sub.lower() in rec.name.value.lower() or sub in phone_row:
                     return rec
-                    
+
 
 """Функції для роботи консольного бота"""
 
@@ -217,10 +221,10 @@ def greeting(*args):
     return "How can I help you?"
 
 
-#@input_error
-def show_all(PHONE_VOCABULAR,*args):
+# @input_error
+def show_all(PHONE_VOCABULAR, *args):
     if PHONE_VOCABULAR:
-        
+
         return PHONE_VOCABULAR.next()
     return f"Phone Vocabulary don`t have contact now"
 
@@ -251,18 +255,25 @@ def show_phone(*args, PHONE_VOCABULAR):
         return rec
     return f"Contact with name {args[0]} is not in the phone book"
 
+
 @input_error
 def search(*args, PHONE_VOCABULAR):
     return PHONE_VOCABULAR.search(args[0])
 
+
+def birthday(*args, PHONE_VOCABULAR):
+    return PHONE_VOCABULAR.data[args[0]].days_to_birthday()
+
+
 COMMANDS = {
-    greeting: ["hello","hi"],
+    greeting: ["hello", "hi"],
     add_contact: ["add", "+"],  # add + name + numer
     exiting: ["exit", "close", "."],
     change: ["change", "edit"],  # change + name + numer + new numer
     show_phone: ["phone"],  # phone + name
     show_all: ["show", "all"],
-    search:["search"]
+    search: ["search"],
+    birthday: ["birthday"],
 }
 
 
@@ -274,15 +285,16 @@ def command_parser(user_input: str):
     return unknown, None
 
 
-def main():
+def main_address_book():
     print(
         """
         Hello,here you can:
         Add to your phone vocabular contact - add + name + numer + birthday
         Change this contact - change + name + numer + new numer
-        Show your contact - phone + name
+        Show your contacts - phone + name
         Search your contact - search + name(first 3 letters)
         Show your all list with contacts - show
+        Shows how many days are left until this user's birthday - birthday + name
         And close this vocabular - exit
         """
     )
@@ -291,7 +303,7 @@ def main():
         PHONE_VOCABULAR.read_book()
     while True:
         user_input = input(">>> ")
-        
+
         if user_input in COMMANDS[exiting]:
             exiting(PHONE_VOCABULAR)
             break
@@ -300,11 +312,11 @@ def main():
             print(command(*data, PHONE_VOCABULAR=PHONE_VOCABULAR))
         else:
             print(command(PHONE_VOCABULAR))
-            #your comments
+            # your comments
     PHONE_VOCABULAR.write_book()
 
 
 if __name__ == "__main__":
     """Командний бот"""
 
-    main()
+    main_address_book()
