@@ -1,0 +1,5 @@
+To install an assistant bot, follow these steps:
+1) Launch the console
+2) Go to directory: "../Helper3000/bot_helper"
+3) Run "pip install ."
+4) Done. Now you can run the bot in the console from any directory by running the command "Helper3000"
