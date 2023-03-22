@@ -191,13 +191,13 @@ def input_error(func):
         try:
             return func(*args, **kwargs)
         except KeyError:
-            print("Give me name and phone please")
+            return "Give me name and phone please"
         except ValueError:
-            print("Enter user name")
+            return "Incorrect number"
         except IndexError:
-            print("Check your input and try again")
+            return "please input birthday date"
         except TypeError:
-            print("typeerror")
+            return "typeerror"
 
     return wrapper
 
@@ -235,7 +235,7 @@ def exiting(PHONE_VOCABULAR):
 
 
 def unknown(*args):
-    print("Command not exist")
+    return "Command not exist"
 
 
 @input_error
@@ -265,6 +265,20 @@ def birthday(*args, PHONE_VOCABULAR):
     return PHONE_VOCABULAR.data[args[0]].days_to_birthday()
 
 
+def book_helper(PHONE_VOCABULAR):
+    return """
+        Hello,here you can:
+        Add to your phone vocabular contact - add + name + numer + birthday
+        Change this contact - change + name + numer + new numer
+        Show your contacts - phone + name
+        Search your contact - search + name(first 3 letters)
+        Show your all list with contacts - show
+        delete contact - delete + name
+        Shows how many days are left until this user's birthday - birthday + name
+        And close this vocabular - exit
+        """
+
+
 COMMANDS = {
     greeting: ["hello", "hi"],
     add_contact: ["add", "+"],  # add + name + numer
@@ -274,6 +288,7 @@ COMMANDS = {
     show_all: ["show", "all"],
     search: ["search"],
     birthday: ["birthday"],
+    book_helper: ["help"],
 }
 
 
@@ -286,19 +301,8 @@ def command_parser(user_input: str):
 
 
 def main_address_book():
-    print(
-        """
-        Hello,here you can:
-        Add to your phone vocabular contact - add + name + numer + birthday
-        Change this contact - change + name + numer + new numer
-        Show your contacts - phone + name
-        Search your contact - search + name(first 3 letters)
-        Show your all list with contacts - show
-        Shows how many days are left until this user's birthday - birthday + name
-        And close this vocabular - exit
-        """
-    )
     PHONE_VOCABULAR = AddressBook()  # створюємо обьект классу при виклику функції
+    print(book_helper(PHONE_VOCABULAR=PHONE_VOCABULAR))
     if isfile(path):
         PHONE_VOCABULAR.read_book()
     while True:
@@ -312,7 +316,7 @@ def main_address_book():
             print(command(*data, PHONE_VOCABULAR=PHONE_VOCABULAR))
         else:
             print(command(PHONE_VOCABULAR))
-            # your comments
+
     PHONE_VOCABULAR.write_book()
 
 
