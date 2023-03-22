@@ -111,9 +111,12 @@ def add_note(user_input):
     new_title.title = title
     new_body.body = body_input
     new_tag.tag = tag_input
-    new_note.note = [new_title, new_body, new_tag]
-
-    default_notebook.add(new_note)
+    if new_title.title and new_body.body:
+        new_note.note = [new_title, new_body, new_tag]
+        default_notebook.add(new_note)
+    else:
+        print("Something was wrong with title or body")
+        print("Try again")
 
 
 @input_error
@@ -134,15 +137,17 @@ def search_note(user_input):
 
 @input_error
 def show_all(user_input):
-    print(f">>> This is your notebook:")
+    print(f">>> This is your notebook:\n")
     sort_by_alphabet(default_notebook)
 
 
 def display(result_notes):
+    print("------------------------------------")
     for val in result_notes.data.values():
         print(f"Title: {val.note[0].title}")
         print(f"Body: {val.note[1].body}")
-        print(f"Tags: {val.note[2].tag}\n")
+        print(f"Tags: {val.note[2].tag}")
+        print("------------------------------------")
 
 
 def find_by_tag(*args):
@@ -156,7 +161,10 @@ def find_by_tag(*args):
                 if i in val.note[2].tag:
                     buff_note.note = val.note
                     result_tags.add(copy(buff_note))
-    sort_by_alphabet(result_tags)
+    if result_tags.data:
+        sort_by_alphabet(result_tags)
+    else:
+        print("Such tags doesn`t found")
 
 
 def sort_by_alphabet(notes: Notebook):
