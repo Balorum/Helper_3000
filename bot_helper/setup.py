@@ -10,4 +10,7 @@ setup(
     license="MIT",
     packages=find_namespace_packages(),
     entry_points={"console_scripts": ["Helper3000 = bot_helper.Bot:main"]},
+    install_requires=[
+        "colorama",
+    ],
 )
